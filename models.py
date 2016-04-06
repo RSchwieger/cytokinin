@@ -3,9 +3,11 @@ from random import uniform
 import math
 
 def hillFunction(x, k, theta):
+    if x == 0:
+        return 0
     if x < 0:
-        print("x<0 in Hill function")
-        raise ValueError
+        print("x<0 in Hill function. Continue With x=0")
+        return 0
     try:
         result = math.pow(x,k)/(math.pow(x,k)+math.pow(theta,k))
     except ValueError:
@@ -17,6 +19,9 @@ def hillFunction(x, k, theta):
         raise ValueError
     return result
 
+"""
+normalized A model
+"""
 def continuousHomologA_normalized(x, k, theta):
     """
     odefy transformation
@@ -26,10 +31,10 @@ def continuousHomologA_normalized(x, k, theta):
     :return: list of real numbers in the interval [0,1]
     """
     y = [0,0,0,0]
-    y[0] = 1-hillFunction(x[2], k[0][2], theta[0][2]) # 1-A
-    y[1] = hillFunction(x[0], k[1][0], theta[1][0]) # P
-    y[2] = hillFunction(x[1], k[2][1], theta[2][1]) # B
-    y[3] = hillFunction(x[2], k[3][2], theta[3][2])*hillFunction(x[0], k[3][0], theta[3][0])
+    y[0] = 1-hillFunction(x[2], k[0][2], theta[0][2]) # P <- 1-A
+    y[1] = hillFunction(x[0], k[1][0], theta[1][0]) # B <- P
+    y[2] = hillFunction(x[1], k[2][1], theta[2][1]) # A <- B
+    y[3] = hillFunction(x[2], k[3][2], theta[3][2])*hillFunction(x[0], k[3][0], theta[3][0]) # Ap <- A*P
     return y
 
 def convertToHumanReadableParametersA_normalized(parameters):
@@ -85,3 +90,4 @@ def getBoundsA_normalized():
     return [(1+eps, None), (1+eps, None), (1+eps, None), (1+eps, None), (1+eps, None), # Hill coefficients
         (eps,1-eps), (eps,1-eps), (eps,1-eps), (eps,1-eps), (eps,1-eps), # Thresholds
         (eps,None), (eps,None), (eps,None), (eps,None)]
+
