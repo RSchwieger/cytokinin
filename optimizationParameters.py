@@ -7,7 +7,7 @@ These imports specify the model which is used
 from models import getBoundsA_normalized as getBounds
 from models import convertToHumanReadableParametersA_normalized as convertToHumanReadableParameters
 from models import continuousHomologA_normalized as continuousHomolog
-from models import getInitialGuessA_normalized as getInitialGuess
+from models import getInitialGuessA_normalized as getInitialGuessT
 #------------
 """
 Different algorithms for the optimization which work with bounds
@@ -41,7 +41,18 @@ result = [ 3.38818778,  4.31806483,  1.33354283,  4.79752918,  1.42254256,
         3.10518132,  3.22540971,  9.76633977,  8.58238796]
 min = 8.0001719989097815
 """
+min_k = 1
+max_k = 5
+min_theta = 0
+max_theta = 1
+min_d = 0
+max_d = 10
+
+def getInitialGuess():
+    return getInitialGuessT(min_k=min_k, max_k=max_k, min_theta=min_theta, max_theta=max_theta, min_d=min_d, max_d=max_d)
+
 x0 = getInitialGuess()
+numberOfOptimizations = 20
 """
 k, theta, d = convertToHumanReadableParameters(x0)
 print("initial guess: ")

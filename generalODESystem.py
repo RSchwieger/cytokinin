@@ -16,7 +16,12 @@ def f(t,x, parameters):
     :return: function evaluation saves as list
     """
     (k, theta, d) = convertToHumanReadableParameters(parameters=parameters)
-    discreteTimestep = continuousHomolog(x, k, theta)
+    try:
+        discreteTimestep = continuousHomolog(x, k, theta)
+    except Exception:
+        print("Parameters cause Exception.")
+        print("parameters: "+str(parameters))
+        raise Exception
     return [d[i]*(discreteTimestep[i]-x[i]) for i in range(len(discreteTimestep))]
 
 
@@ -119,6 +124,7 @@ def plotODEsolution(parameters, initialValue, stoppingTime, numberOfSteps, metho
     plt.ylabel('x')
     plt.xlabel('time')
     plt.legend(loc=0)
+    # k, theta, d = convertToHumanReadableParameters(parameters=parameters)
     plt.title("Trajectory of the solutions of the ODE-system with initial state "+str(initialValue))
     plt.show(block=True)
 

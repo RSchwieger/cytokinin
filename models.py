@@ -3,19 +3,24 @@ from random import uniform
 import math
 
 def hillFunction(x, k, theta):
+    # if the x-value is minimally negative it is set back to zero. However when the x-value for some reason falls
+    # below neg_tol an Exception is thrown
+    neg_tol = -10**(-2)
     if x == 0:
         return 0
     if x < 0:
-        print("x<0 in Hill function. Continue With x=0")
-        return 0
+        if x > neg_tol:
+            print("x = "+str(x)+" < 0 in Hill function. Continue With x=0")
+            return 0
+        else:
+            print("x = "+str(x)+" is negative.")
+            raise Exception
     try:
         result = math.pow(x,k)/(math.pow(x,k)+math.pow(theta,k))
     except ValueError:
         print("x: "+str(x))
         print("k: "+str(k))
         print("theta: "+str(theta))
-        print(math.pow(x,k))
-        print(math.pow(theta,k))
         raise ValueError
     return result
 
@@ -30,11 +35,15 @@ def continuousHomologA_normalized(x, k, theta):
     :param theta: matrix of real numbers in the interval (0,1)
     :return: list of real numbers in the interval [0,1]
     """
-    y = [0,0,0,0]
-    y[0] = 1-hillFunction(x[2], k[0][2], theta[0][2]) # P <- 1-A
-    y[1] = hillFunction(x[0], k[1][0], theta[1][0]) # B <- P
-    y[2] = hillFunction(x[1], k[2][1], theta[2][1]) # A <- B
-    y[3] = hillFunction(x[2], k[3][2], theta[3][2])*hillFunction(x[0], k[3][0], theta[3][0]) # Ap <- A*P
+    try:
+        y = [0,0,0,0]
+        y[0] = 1-hillFunction(x[2], k[0][2], theta[0][2]) # P <- 1-A
+        y[1] = hillFunction(x[0], k[1][0], theta[1][0]) # B <- P
+        y[2] = hillFunction(x[1], k[2][1], theta[2][1]) # A <- B
+        y[3] = hillFunction(x[2], k[3][2], theta[3][2])*hillFunction(x[0], k[3][0], theta[3][0]) # Ap <- A*P
+    except ValueError:
+        print("Value Error in continuousHomolog")
+        raise ValueError
     return y
 
 def convertToHumanReadableParametersA_normalized(parameters):
@@ -59,27 +68,11 @@ def convertToHumanReadableParametersA_normalized(parameters):
     d = [parameters[10], parameters[11], parameters[12], parameters[13]]
     return k, theta, d
 
-def getInitialGuessA_normalized():
+def getInitialGuessA_normalized(min_k, max_k, min_theta, max_theta, min_d, max_d):
     return [uniform(1,5), uniform(1,5), uniform(1,5), uniform(1,5) ,uniform(1,5), # k
               uniform(0,1), uniform(0,1), uniform(0,1), uniform(0,1), uniform(0,1), # theta
               uniform(0,10),uniform(0,10),uniform(0,10),uniform(0,10)] # d
 
-def constraintsSatisfiedA_normalized(parameters):
-    """
-    Checks if the constraints are satisfied
-    :param parameters:
-    :return: True = constraints satisfied, False = constraints are not satisfied
-    """
-    for i in range(5): # Hill coefficients
-        if parameters[i]<=1:
-            return False
-    for i in range(5,10): # Thresholds
-        if parameters[i]<=0 or parameters[i]>=1:
-            return False
-    for i in range(10,14): # D
-        if parameters[i] <= 0:
-            return False
-    return True
 
 def getBoundsA_normalized():
     """

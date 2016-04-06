@@ -18,6 +18,7 @@ from optimizationParameters import methodForODE
 from optimizationParameters import timeseries
 from optimizationParameters import x0
 from optimizationParameters import ftol
+from optimizationParameters import numberOfOptimizations
 
 def optimize(timeseries, x0):
     """
@@ -41,26 +42,47 @@ def optimizeSeveralTimes(timeseries, numberOfAttempts):
     :param numberOfAttempts: number of optimize-calls
     :return: tuple: (best solution, corresponding initialGuess)
     """
-    initialGuess = getInitialGuess()
-    global_sol = optimize(timeseries=timeseries, x0=initialGuess)
-    for i in range(numberOfAttempts-1):
+    global_sol = None
+    for i in range(numberOfAttempts):
         newGuess = getInitialGuess()
-        local_sol = optimize(timeseries=timeseries, x0=newGuess)
+        try:
+            local_sol = optimize(timeseries=timeseries, x0=newGuess)
+        except Exception:
+            print("An error occured during the optimization with the following parameters")
+            printParameters(newGuess)
+            print("Try new initial guess")
+            continue
         print("local minimum with "+str(local_sol.fun))
-        if local_sol.fun < global_sol.fun:
+        print(str(i)+" th call of optimize")
+        printParameters(newGuess)
+        print("----------------------------------------")
+        if global_sol is None or local_sol.fun < global_sol.fun:
             global_sol = local_sol
             initialGuess = newGuess
     return (global_sol, initialGuess)
 
+def printParameters(parameters):
+    """
+    Prints parameters in internal and human readable format
+    :param parameters:
+    :return: -
+    """
+    print("Parameters: "+str(parameters))
+    k, theta, d = convertToHumanReadableParameters(parameters=parameters)
+    print("In human readable format")
+    print("k_initial: "+str(k))
+    print("theta_initial: "+str(theta))
+    print("d_initial: "+str(d))
 
-sol, initialGuess = optimizeSeveralTimes(timeseries, 5)
+
+
+sol, initialGuess = optimizeSeveralTimes(timeseries, numberOfOptimizations)
+print("--------------------------------------------------------------")
+print("Result of computation:")
 print(sol)
-print("With initial guess: "+str(initialGuess))
-k, theta, d = convertToHumanReadableParameters(x0)
-print("In human readable format")
-print("k_initial: "+str(k))
-print("theta_initial: "+str(theta))
-print("d_initial: "+str(d))
+print("With initial guess")
+printParameters(initialGuess)
+
 
 (time, initialValue) = timeseries[0]
 (stoppingTime, p) = timeseries[-1]
