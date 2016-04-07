@@ -27,14 +27,15 @@ def f(t,x, parameters):
 
 # Solving the ODE-system
 
-def getSolutionAtTimeT(initialValue, stoppingTime, dt, parameters, method):
+def computeSolutionOfODE(initialValue, stoppingTime, dt, parameters, method):
     """
     Solves the ODE-system and returns the state at the stopping time
     :param initialValue: initial Value of the ODE-system
     :param stoppingTime:
     :param dt: time step
-    :return: state at stopping time
+    :return: state at stopping time, maximum
     """
+    maxVector = [0 for i in initialValue]
     y = ode(f).set_integrator(method)
     y.set_initial_value(initialValue, 0.0).set_f_params(parameters) # set initial value at time = 0
     i = 0
@@ -51,33 +52,38 @@ def getSolutionAtTimeT(initialValue, stoppingTime, dt, parameters, method):
             print(k)
             print(theta)
             print(d)
-    return y
+        else:
+            maxVector = [max(y.y[i], maxVector[i]) for i in range(len(y.y))]
+    return y, maxVector
 
-def getSolutionAtTimepoints(initialValue, timePoints, dt, parameters, method):
+def computeSolutionOfODEAtTimepoints(initialValue, timePoints, dt, parameters, method):
     """
     Computes a solution vector that contains only the values at the specified timepoints.
     :param initialValue: initial value of the ODE-System
     :param timePoints: monotonous list of time points
     :param dt: size of time steps
     :return: list of tuples. The first entry of a tuple is the time point, the second the corresponding value of the function
+    and maximum of components
     """
     # compute a list of distances between the time steps
     relativeTimePoints = [timePoints[i+1]-timePoints[i] for i in range(len(timePoints)-1)]
     # initialize the return value with the first evaluation
     timeseries = [(0, initialValue)]
+    maxVector = [0 for i in initialValue]
 
     #iterate over the relative time points and absolute time points
     for i in range(len(relativeTimePoints)):
         # solve the ODE-System with initial value = last evaluation and stopping time the current distance to the next
         # time step
-        y = getSolutionAtTimeT(initialValue=initialValue, stoppingTime=relativeTimePoints[i], dt=dt,
+        y, maxVectorInStep = computeSolutionOfODE(initialValue=initialValue, stoppingTime=relativeTimePoints[i], dt=dt,
                                parameters=parameters, method=method)
+        maxVector = [max(maxVector[i], maxVectorInStep[i]) for i in range(len(maxVector))]
         initialValue = y.y # update initial value for next computation step
         # save the result and the correct time point
         timeseries += [(timePoints[i+1], list(y.y))]
-    return timeseries
+    return timeseries, maxVector
 
-def computeError(timeseries, parameters, dt, method):
+def leastSquareError(timeseries, parameters, dt, method):
     """
     This method computes for a set of parameters for the ODE-system a solution and its least square error
     with respect to the time series
@@ -88,7 +94,7 @@ def computeError(timeseries, parameters, dt, method):
     """
     timePoints = [t for (t,p) in timeseries]
     points = [p for (t,p) in timeseries]
-    computedTimeseries= getSolutionAtTimepoints(initialValue=points[0], timePoints=timePoints, dt=dt,
+    computedTimeseries, maxVector= computeSolutionOfODEAtTimepoints(initialValue=points[0], timePoints=timePoints, dt=dt,
                                                 parameters=parameters, method=method)
     computedPoints = [p for (t,p) in computedTimeseries]
     error = 0
