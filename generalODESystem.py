@@ -97,10 +97,7 @@ def leastSquareError(timeseries, parameters, dt, method):
     computedTimeseries, maxVector= computeSolutionOfODEAtTimepoints(initialValue=points[0], timePoints=timePoints, dt=dt,
                                                 parameters=parameters, method=method)
     computedPoints = [p for (t,p) in computedTimeseries]
-    error = 0
-    for i in range(len(timeseries)):
-        error += distance.euclidean(points[i], computedPoints[i])**2
-    return error
+    return sum([distance.euclidean(points[i], computedPoints[i])**2 for i in range(len(timeseries))]) # least square error
 
 def plotODEsolution(parameters, initialValue, stoppingTime, numberOfSteps, method):
     """

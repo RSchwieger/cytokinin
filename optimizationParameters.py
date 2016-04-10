@@ -12,10 +12,14 @@ from models import getInitialGuessA_normalized as getInitialGuessT
 """
 Different algorithms for the optimization which work with bounds
 """
+from scipy.optimize import brute
+from scipy.optimize import basinhopping
 
 # method='L-BFGS-B' # L-BFGS-B algorithm
 # method='TNC' # truncated Newton (TNC) algorithm
 method='SLSQP' #  Sequential Least SQuares Programming (SLSQP)
+
+
 ftol = 1e-50 # Precision goal for the value of f in the stopping criterion.
 
 """

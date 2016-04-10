@@ -80,9 +80,9 @@ def getBoundsA_normalized():
     :return:
     """
     eps = 10**(-3)
-    return [(1+eps, None), (1+eps, None), (1+eps, None), (1+eps, None), (1+eps, None), # Hill coefficients
+    return [(1+eps, 10), (1+eps, 10), (1+eps, 10), (1+eps, 10), (1+eps, 10), # Hill coefficients
         (eps,1-eps), (eps,1-eps), (eps,1-eps), (eps,1-eps), (eps,1-eps), # Thresholds
-        (eps,None), (eps,None), (eps,None), (eps,None)]
+        (eps,10), (eps,10), (eps,10), (eps,10)] # life time of species
 
 """
 normalized B model
